@@ -1,0 +1,24 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0  # Use the latest version
+    hooks:
+      - id: trailing-whitespace  # Removes trailing whitespace
+      - id: end-of-file-fixer    # Ensures files end with a newline
+      - id: debug-statements     # Detects `print` and `pdb` debug statements in Python files
+
+  - repo: https://github.com/psf/black
+    rev: 23.9.1  # Use the latest version of Black
+    hooks:
+      - id: black  # Formats Python code to PEP 8 standards
+
+  - repo: https://github.com/PyCQA/flake8
+    rev: 6.1.0  # Use the latest version of Flake8
+    hooks:
+      - id: flake8  # Lints Python files
+        args:
+          - --config=.code_quality/.flake8
+
+  - repo: https://github.com/pre-commit/mirrors-isort
+    rev: v5.10.1  # Use the latest version of isort
+    hooks:
+      - id: isort  # Sorts Python imports
