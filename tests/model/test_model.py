@@ -26,7 +26,7 @@ class TestModel(unittest.TestCase):
     def setUp(self) -> None:
         super().setUp()
         self.model = DelayModel()
-        self.data = pd.read_csv(filepath_or_buffer="../data/data.csv")
+        self.data = pd.read_csv(filepath_or_buffer="data/data.csv")
 
     def test_model_preprocess_for_training(self):
         features, target = self.model.preprocess(data=self.data, target_column="delay")
@@ -67,6 +67,10 @@ class TestModel(unittest.TestCase):
         assert report["1"]["f1-score"] > 0.30
 
     def test_model_predict(self):
+        features, target = self.model.preprocess(data=self.data, target_column="delay")
+
+        self.model.fit(features=features, target=target)
+
         features = self.model.preprocess(data=self.data)
 
         predicted_targets = self.model.predict(features=features)
@@ -76,3 +80,9 @@ class TestModel(unittest.TestCase):
         assert all(
             isinstance(predicted_target, int) for predicted_target in predicted_targets
         )
+
+    def test_model_predict_error(self):
+        features = self.model.preprocess(data=self.data)
+
+        with self.assertRaises(ValueError):
+            self.model.predict(features=features)
