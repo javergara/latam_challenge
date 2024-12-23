@@ -31,6 +31,25 @@ In this section, we will transcribe the code from a Jupyter Notebook (`.ipynb`) 
    - Modify **test_model_predict** test to train a model first and then use it, as it was before, the test is always failing as the model needs to be trained first. Despite the model was trained in the previous test, remember that each tests is independent and the setup method will always clear and instantiate again all for each test.
    - Add **test_model_predict_error** test to increase the coverage and test the error case when the model is not trained before
 
+## Part 2: Deploy the model in an API with FastAPI using the api.py file.
+
+### Description:
+
+The model with the TOP 10 features and balanced was deployed on the FastAPI App, all test cases passed, some considerations:
+
+- The DelayModel class was modified adding two methods to export model and load model
+- When using the export model method this will create a new model with a timestamp (for versioning the model) and replace the `model_latest.joblib`
+- The api will always use the `model/model_latest.joblib` model to do a predictions
+
+Example of how to do a prediction with the api:
+
+```bash
+curl -X 'POST' 'http://127.0.0.1:8000/predict' -H 'accept: application/json' -H 'Content-Type: application/json' -d '{"flights": [{"OPERA": "Grupo LATAM","TIPOVUELO": "I" "MES": 11}]}'
+```
+
+> **Note:**
+> As future improvement, model versioning and data versioning can be added, the model versioning implemented using the timestamp is not a good idea in a real environment
+
 ### Conclusion
 
 -------
