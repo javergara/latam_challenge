@@ -15,7 +15,7 @@ TOP_10_FEATURES = [
 
 THRESHOLD_IN_MINUTES = 15
 
-LATEST_MODEL_PATH = "./models/model_latest.joblib"
+LATEST_MODEL_PATH = "models/model_latest.joblib"
 
 HTML_HOME_CONTENT = """
     <!DOCTYPE html>
