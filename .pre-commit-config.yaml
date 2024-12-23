@@ -22,3 +22,4 @@ repos:
     rev: v5.10.1  # Use the latest version of isort
     hooks:
       - id: isort  # Sorts Python imports
+        args: ["--profile", "black", "--filter-files"]

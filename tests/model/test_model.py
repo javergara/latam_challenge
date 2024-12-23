@@ -1,9 +1,11 @@
 import unittest
 
 import pandas as pd
+import pytest
 from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
 
+from challenge.exceptions import LoadModelError
 from challenge.model import DelayModel
 
 
@@ -55,7 +57,11 @@ class TestModel(unittest.TestCase):
 
         self.model.fit(features=features, target=target)
 
-        predicted_target = self.model._model.predict(features_validation)
+        predicted_target = (
+            self.model._model.predict(  # pylint: disable=protected-access
+                features_validation
+            )
+        )
 
         report = classification_report(
             target_validation, predicted_target, output_dict=True
@@ -86,3 +92,20 @@ class TestModel(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             self.model.predict(features=features)
+
+    def test_load_model(self):
+        model = DelayModel()
+        model.load_model()
+
+        assert model._model is not None  # pylint: disable=protected-access
+        assert hasattr(model._model, "predict")  # pylint: disable=protected-access
+
+    def test_load_model_error(self):
+        model = DelayModel()
+
+        model_path = "models/unkown_model.joblib"
+
+        with pytest.raises(LoadModelError) as exc_info:
+            model.load_model(model_path=model_path)
+
+        assert f"Error loading model from {model_path}." in str(exc_info.value)

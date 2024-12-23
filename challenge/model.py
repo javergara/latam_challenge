@@ -1,14 +1,21 @@
 """ Model for predicting flight delays. """
 
 
+import logging
+import os
+from datetime import datetime
 from typing import List, Tuple, Union
 
+import joblib
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 
-from challenge.constants import THRESHOLD_IN_MINUTES, TOP_10_FEATURES
+from challenge.constants import LATEST_MODEL_PATH, THRESHOLD_IN_MINUTES, TOP_10_FEATURES
+from challenge.exceptions import LoadModelError
 from challenge.preprocess_functions import get_min_diff
+
+logger = logging.getLogger(__name__)
 
 
 class DelayModel:
@@ -41,6 +48,10 @@ class DelayModel:
             ],
             axis=1,
         )
+
+        for feature in TOP_10_FEATURES:
+            if feature not in features:
+                features[feature] = 0
 
         if target_column is not None:
             data["min_diff"] = data.apply(get_min_diff, axis=1)
@@ -84,6 +95,32 @@ class DelayModel:
             ValueError: if model has not been trained.
         """
         if self._model is None:
-            raise ValueError("Model has not been trained. Please fit the model first.")
+            raise ValueError("Model has not been trained or loaded.")
 
         return (self._model.predict(features)).tolist()
+
+    def export_model(self) -> None:  # pragma: no cover
+        """Save the model to a file."""
+        os.makedirs("models", exist_ok=True)
+
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        versioned_model_path = f"models/model_{timestamp}.joblib"
+
+        joblib.dump(self._model, versioned_model_path)
+        joblib.dump(self._model, LATEST_MODEL_PATH)
+
+        logger.info(
+            f"Model saved as {versioned_model_path} and updated 'model_latest.joblib'."
+        )
+
+    def load_model(self, model_path: str = LATEST_MODEL_PATH) -> None:
+        """Load a model from a file.
+
+        Args:
+            model_path (str): path to the model file.
+        """
+        try:
+            self._model = joblib.load(model_path)
+            logger.info(f"Model loaded from {model_path}.")
+        except Exception as error:
+            raise LoadModelError(f"Error loading model from {model_path}.") from error
