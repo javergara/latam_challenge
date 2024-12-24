@@ -31,6 +31,9 @@ In this section, we will transcribe the code from a Jupyter Notebook (`.ipynb`) 
    - Modify **test_model_predict** test to train a model first and then use it, as it was before, the test is always failing as the model needs to be trained first. Despite the model was trained in the previous test, remember that each tests is independent and the setup method will always clear and instantiate again all for each test.
    - Add **test_model_predict_error** test to increase the coverage and test the error case when the model is not trained before
 
+**Evidence of running the make model-test**
+![model-test](../images/model_test.png)
+
 ## Part 2: Deploy the model in an API with FastAPI using the api.py file.
 
 ### Description:
@@ -47,9 +50,85 @@ Example of how to do a prediction with the api:
 curl -X 'POST' 'http://127.0.0.1:8000/predict' -H 'accept: application/json' -H 'Content-Type: application/json' -d '{"flights": [{"OPERA": "Grupo LATAM","TIPOVUELO": "I" "MES": 11}]}'
 ```
 
+**Evidence of running the make api-test**
+![model-test](../images/api_test.png)!
+
+
 > **Note:**
 > As future improvement, model versioning and data versioning can be added, the model versioning implemented using the timestamp is not a good idea in a real environment
 
-### Conclusion
 
--------
+## Part 3: Deploy the API in your favorite cloud provider
+
+For this part, a Dockerfile was created in order to deploy the app in any service, for this case GCP was choosen and the api was deployed using Google Cloud Run, connected directly to the GitHub repository (CD will be explained in part 4) which build and deploy the DockerFile
+
+The URL to do the requests is:
+
+`https://fastapi-app-677745446904.us-central1.run.app`
+
+and example of how to get a prediction to the server:
+
+```bash
+curl -X 'POST' \
+  'https://fastapi-app-677745446904.us-central1.run.app/predict' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "flights": [
+    {
+      "OPERA": "Grupo LATAM",
+      "TIPOVUELO": "I",
+      "MES": 11
+    }
+  ]
+}'
+```
+
+### Result of the stres test:
+
+After running the `make stress-test` some results are:\
+
+**Statistics**
+![Statistics](../images/statistics_stress_test.png)
+
+**Charts**
+![Charts](../images/charts_stress_test.png)
+
+**Final ratio**
+
+Ratio Per Class
+- 100.0% StressUser
+   - 50.0% predictArgentinas
+   - 50.0% predictLatam
+Total Ratio
+- 100.0% StressUser
+   - 50.0% predictArgentinas
+   - 50.0% predictLatam
+
+## Part 4: proper CI/CD implementation for this development.
+
+Let's divide in two,
+
+### CI
+
+The CI is inside `.github/workflows/ci.yml`, it runs when there is a push on main or develop
+
+**Evidences of running the CI:**
+
+[github workflow](https://github.com/javergara/latam_challenge/actions) here you can find the workflows executions
+
+![ci](../images/ci_evidence.png)
+
+### CD
+
+The CD is not on `.github/workflows/cd.yml` because it is already integrated to the `cloud run service` , and it is triggered when main branch is pushed
+
+**Configuration:**
+
+![cd](../images/cd_config.png)
+
+**Evidence of CD runs**
+
+![trigger](../images/trigger.png)
+
+![history](../images/history.png)
